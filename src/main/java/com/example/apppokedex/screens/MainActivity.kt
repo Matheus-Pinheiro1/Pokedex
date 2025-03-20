@@ -1,6 +1,9 @@
 package com.example.apppokedex.screens
 
 import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.SearchView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,80 +27,98 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.apppokedex.R
 import com.example.apppokedex.ui.theme.AppPokedexTheme
 
 class MainActivity : ComponentActivity() {
+
+
+    private lateinit var searchView: SearchView
+    private lateinit var listView: ListView
+    private lateinit var adapter: ArrayAdapter<String>
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MainScreen()
-        }
-    }
-}
+        setContentView(R.layout.activity_main)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-    AppPokedexTheme {
-        Scaffold(topBar = {
-            AppBar(navController) // Chama a função AppBar
-        }, modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
-}
+        searchView = findViewById(R.id.searchView)
+        listView = findViewById(R.id.listView)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppBar(navController: NavHostController) {
-    var title by remember { mutableStateOf("") }
+        val items: List<String> = listOf("Item 1", "Item 2")
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items )
+        listView.adapter = adapter
 
-    LaunchedEffect(navController.currentBackStackEntryFlow) {
-        navController.currentBackStackEntryFlow.collect {
-            title = it.destination.route ?: ""
-        }
-    }
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
 
-    Surface(shadowElevation = 3.dp) {
-        TopAppBar(
-            title = {
-                Text(
-                    "Home",
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter.filter(newText)
+                return true
+            }
+
+
+            @OptIn(ExperimentalMaterial3Api::class)
+            @Composable
+            fun MainScreen() {
+                val navController = rememberNavController()
+                AppPokedexTheme {
+                    Scaffold(topBar = {
+                        AppBar(navController) // Chama a função AppBar
+                    }, modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        Greeting(
+                            name = "Android",
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                }
+            }
+
+            @OptIn(ExperimentalMaterial3Api::class)
+            @Composable
+            fun AppBar(navController: NavHostController) {
+                var title by remember { mutableStateOf("") }
+
+                LaunchedEffect(navController.currentBackStackEntryFlow) {
+                    navController.currentBackStackEntryFlow.collect {
+                        title = it.destination.route ?: ""
+                    }
+                }
+
+                Surface(shadowElevation = 3.dp) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                "Home",
 //                    getTitleForRoute(title).uppercase(),
-                    style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        modifier = Modifier,
+                        colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+                    )
+                }
+            }
+
+            private fun Any.uppercase(): Any {
+                TODO("Not yet implemented")
+            }
+
+            fun getTitleForRoute(title: Any): Any {
+                TODO("Not yet implemented")
+            }
+
+            @Composable
+            fun Greeting(name: String, modifier: Modifier = Modifier) {
+                Text(
+                    text = "Hello $name!",
+                    modifier = modifier
                 )
-            },
-            modifier = Modifier,
-            colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+            }
+        }
         )
-    }
-}
+}}
 
-private fun Any.uppercase(): Any {
-    TODO("Not yet implemented")
-}
 
-fun getTitleForRoute(title: Any): Any {
-    TODO("Not yet implemented")
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AppPokedexTheme {
-        Greeting("Android")
-    }
-}
